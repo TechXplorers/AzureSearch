@@ -1,0 +1,215 @@
+﻿@using AdventureWorksWeb.Controllers
+@model dynamic
+@{
+    ViewBag.Title = "Search";
+}
+
+<h2>Product search</h2>
+
+@if (@ViewBag.errorMessage != null)
+{
+    @ViewBag.errorMessage
+}
+else
+{
+    <div class="container">
+        <form action="/Home/Search" method="get">
+            <input type="search" name="q" id="q" value="@ViewBag.searchString" autocomplete="off" size="100"/> <button type="submit">Search</button>
+            <input type="hidden" name="department" id="department" value="@ViewBag.department"/>
+            <input type="hidden" name="category" id="category" value="@ViewBag.category"/>
+           <input type="hidden" name="brandName" id="brandName" value="@ViewBag.brandName"/>
+            <input type="hidden" name="sort" id="sort" value="@ViewBag.sort"/>
+        </form>
+    </div>
+
+    <p> @ViewBag.Dep</p>
+    <p> @ViewBag.DepCount</p>
+}
+
+@if (@Model != null)
+{
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+
+                <b>Department</b>
+
+                <ul style="list-style: none;">
+                    
+                    @foreach (var description in Model["@search.facets"].L1_NAME)
+                    {
+                        <li>
+
+                            @if (ViewBag.specificDepartmentSearch)
+                            {
+                                <input id="dep" type="checkbox" onclick="HandleDepartmentClick('@description.value', '@ViewBag.specificDepartmentSearch')" value="@description.value" checked="checked" />
+                            }
+                            else
+                            {
+                                <input id="dep" type="checkbox" onclick="HandleDepartmentClick('@description.value', '@ViewBag.specificDepartmentSearch')" value="@description.value" />
+                            }
+
+                            <label for="dep">@description.value</label> (@description.count)
+
+                        </li>
+                    }
+
+                    @foreach (var department in (List<FacetValue>)ViewData["facetValue"])
+                    {
+                        <li>
+                            <input id="dep" type="checkbox" onclick="HandleDepartmentOtherClick('@department.Value', '@ViewBag.specificDepartmentSearch')" value="@department.Value" />
+                            <label for="dep">@department.Value</label> (@department.Count)
+                        </li>
+                    }
+
+                </ul>
+
+                <p>
+                    <b>Brand Name</b>
+                </p>
+
+                <ul style="list-style: none;">
+                    @foreach (var description in Model["@search.facets"].BRAND_NAME)
+                    {
+                        <li>
+
+                            @if (ViewBag.specificBrandNameSearch)
+                            {
+                                <input id="brand" type="checkbox" onclick="HandleBrandNameClick('@description.value', '@ViewBag.specificBrandNameSearch')" value="@description.value" checked="checked"/>
+                            }
+                            else
+                            {
+                                <input id="brand" type="checkbox" onclick="HandleBrandNameClick('@description.value', '@ViewBag.specificBrandNameSearch')" value="@description.value" />
+                            }
+
+                            <label for="brand">@description.value</label> (@description.count)
+
+                        </li>
+                    }
+
+                    @foreach (var brand in (List<FacetValue>)ViewData["brandFacet"])
+                    {
+                        <li>
+                            <input id="dep" type="checkbox" onclick="HandleBrandNameOtherClick('@brand.Value', '@ViewBag.specificBrandNameSearch')" value="@brand.Value" />
+                            <label for="dep">@brand.Value</label> (@brand.Count)
+                        </li>
+                    }
+
+                </ul>
+
+                @*<p>
+                    <b>Category</b>
+                </p>
+
+                <ul style="list-style: none;">
+                    @foreach (var description in Model["@search.facets"].L3_NAME)
+                    {
+                        <li>
+
+                            @if (ViewBag.specificCategorySearch)
+                            {
+                                <input id="category" type="checkbox" onclick="HandleCategoryClick('@description.value', '@ViewBag.specificCategorySearch')" value="@description.value" checked="checked"/>
+                            }
+                            else
+                            {
+                                <input id="category" type="checkbox" onclick="HandleCategoryClick('@description.value', '@ViewBag.specificCategorySearch')" value="@description.value"/>
+                            }
+
+                            <label for="category">@description.value</label> (@description.count)
+
+                        </li>
+                    }
+                </ul>*@
+
+            </div>
+            <div class="col-md-8">
+
+                <p>You are Searching for :   <b>@ViewBag.searchDisplay</b> </p> 
+                <p>Found <b>@Model["@odata.count"]</b> products in the catalog</p>
+                <p>Search Time <b> @ViewBag.timeDisplay</b></p>
+
+                <ul>
+                    @foreach (var product in Model.value)
+                    {
+                        <li>
+                            <p>
+                                <b>@product.UPC_DSC</b>
+                            <p>
+                                Category: @product.L3_NAME, From: @product.MANUFACTURER_NAME
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>        
+
+        function HandleDepartmentClick(facetValue, activeSearch) {
+            //debugger;
+            if (activeSearch) {
+                document.getElementById('department').value = document.getElementById('department').value.replace(facetValue, '');
+                document.forms[0].submit();
+                return false;
+            } else {
+
+                document.getElementById('department').value = facetValue;
+                document.forms[0].submit();
+                return false;
+            }
+        }
+
+        function HandleDepartmentOtherClick(facetValue, activeSearch) {
+            //debugger;
+            if (document.getElementById('department').value === '') {
+                document.getElementById('department').value = facetValue;
+            } else {
+                document.getElementById('department').value = document.getElementById('department').value + ',' + facetValue;
+            }
+                document.forms[0].submit();
+                return false;
+        }
+
+        function HandleBrandNameClick(facetValue, activeSearch) {
+            //debugger;
+            if (activeSearch) {
+                document.getElementById('brandName').value = document.getElementById('brandName').value.replace(facetValue, '');
+                document.forms[0].submit();
+                return false;
+            } else {
+                document.getElementById('brandName').value = facetValue;
+                document.forms[0].submit();
+                return false;
+            }
+        }
+
+        function HandleBrandNameOtherClick(facetValue, activeSearch) {
+            //debugger;
+            if (document.getElementById('brandName').value === '') {
+                document.getElementById('brandName').value = facetValue;
+            } else {
+                document.getElementById('brandName').value = document.getElementById('brandName').value + ',' + facetValue;
+            }
+            document.forms[0].submit();
+            return false;
+        }
+
+        function HandleCategoryClick(facetValue, activeSearch) {
+            //debugger;
+
+            if (activeSearch) {
+                document.getElementById('category').value = '';
+                document.forms[0].submit();
+                return false;
+            } else {
+                document.getElementById('category').value = facetValue;
+                document.forms[0].submit();
+                return false;
+            }
+
+        }
+
+    </script>
+}
